@@ -198,7 +198,7 @@ export async function withStockLock<T>(
 ): Promise<T> {
   return prisma.$transaction(async (tx) => {
     const { a, b } = lockKeys(baseId, equipmentTypeId);
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(${a}, ${b})`;
+    await tx.$executeRawUnsafe("SELECT pg_advisory_xact_lock($1::integer, $2::integer)", a, b);
     return work(tx);
   });
 }

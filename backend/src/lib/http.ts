@@ -29,13 +29,13 @@ export function parsePositiveInt(value: unknown, field: string): number {
 
 export function endOfDay(date: Date): Date {
   const copy = new Date(date);
-  copy.setHours(23, 59, 59, 999);
+  copy.setUTCHours(23, 59, 59, 999);
   return copy;
 }
 
 export function startOfDay(date: Date): Date {
   const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
+  copy.setUTCHours(0, 0, 0, 0);
   return copy;
 }
 
