@@ -1,0 +1,42 @@
+export function formatQty(value: number, unit?: string) {
+  const formatted = new Intl.NumberFormat("en-US").format(value);
+  return unit ? `${formatted} ${unit}` : formatted;
+}
+
+export function formatMoney(value: number | string) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value));
+}
+
+export function formatDate(value: string | Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(value));
+}
+
+export function formatDateTime(value: string | Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+export function roleLabel(role: string) {
+  if (role === "ADMIN") return "Administrator";
+  if (role === "BASE_COMMANDER") return "Base Commander";
+  if (role === "LOGISTICS_OFFICER") return "Logistics Officer";
+  return role;
+}
+
+export function toDateInput(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+export function toDateTimeLocal(date = new Date()) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}

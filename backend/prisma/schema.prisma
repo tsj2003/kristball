@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  BASE_COMMANDER
+  LOGISTICS_OFFICER
+}
+
+enum EquipmentCategory {
+  WEAPON
+  VEHICLE
+  AMMUNITION
+}
+
+model Base {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  location  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users        User[]
+  personnel    Personnel[]
+  purchases    Purchase[]
+  assignments  Assignment[]
+  transfersOut Transfer[]    @relation("TransferOrigin")
+  transfersIn  Transfer[]    @relation("TransferDestination")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  fullName     String
+  role         Role
+  baseId       String?
+  base         Base?    @relation(fields: [baseId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  purchases    Purchase[]
+  transfers    Transfer[]    @relation("TransferInitiator")
+  assignments  Assignment[]
+  expenditures Expenditure[]
+  auditLogs    AuditLog[]
+}
+
+model EquipmentType {
+  id          String             @id @default(uuid())
+  name        String
+  category    EquipmentCategory
+  unit        String
+  description String?
+  createdAt   DateTime           @default(now())
+
+  purchases   Purchase[]
+  transfers   Transfer[]
+  assignments Assignment[]
+}
+
+// Service members who hold assigned equipment. They are not login accounts.
+model Personnel {
+  id            String   @id @default(uuid())
+  baseId        String
+  base          Base     @relation(fields: [baseId], references: [id])
+  fullName      String
+  rank          String
+  serviceNumber String   @unique
+  createdAt     DateTime @default(now())
+
+  assignments Assignment[]
+
+  @@index([baseId])
+}
+
+model Purchase {
+  id              String        @id @default(uuid())
+  baseId          String
+  base            Base          @relation(fields: [baseId], references: [id])
+  equipmentTypeId String
+  equipmentType   EquipmentType @relation(fields: [equipmentTypeId], references: [id])
+  quantity        Int
+  unitCost        Decimal       @db.Decimal(12, 2)
+  purchasedAt     DateTime
+  purchasedById   String
+  purchasedBy     User          @relation(fields: [purchasedById], references: [id])
+  notes           String?
+  createdAt       DateTime      @default(now())
+
+  @@index([baseId, equipmentTypeId, purchasedAt])
+}
+
+model Transfer {
+  id              String        @id @default(uuid())
+  fromBaseId      String
+  fromBase        Base          @relation("TransferOrigin", fields: [fromBaseId], references: [id])
+  toBaseId        String
+  toBase          Base          @relation("TransferDestination", fields: [toBaseId], references: [id])
+  equipmentTypeId String
+  equipmentType   EquipmentType @relation(fields: [equipmentTypeId], references: [id])
+  quantity        Int
+  transferredAt   DateTime
+  initiatedById   String
+  initiatedBy     User          @relation("TransferInitiator", fields: [initiatedById], references: [id])
+  notes           String?
+  createdAt       DateTime      @default(now())
+
+  @@index([fromBaseId, equipmentTypeId, transferredAt])
+  @@index([toBaseId, equipmentTypeId, transferredAt])
+}
+
+model Assignment {
+  id              String        @id @default(uuid())
+  baseId          String
+  base            Base          @relation(fields: [baseId], references: [id])
+  personnelId     String
+  personnel       Personnel     @relation(fields: [personnelId], references: [id])
+  equipmentTypeId String
+  equipmentType   EquipmentType @relation(fields: [equipmentTypeId], references: [id])
+  quantity        Int
+  assignedAt      DateTime
+  assignedById    String
+  assignedBy      User          @relation(fields: [assignedById], references: [id])
+  notes           String?
+  createdAt       DateTime      @default(now())
+
+  expenditures Expenditure[]
+
+  @@index([baseId, equipmentTypeId, assignedAt])
+  @@index([personnelId])
+}
+
+model Expenditure {
+  id           String     @id @default(uuid())
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  quantity     Int
+  expendedAt   DateTime
+  recordedById String
+  recordedBy   User       @relation(fields: [recordedById], references: [id])
+  notes        String?
+  createdAt    DateTime   @default(now())
+
+  @@index([assignmentId, expendedAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
