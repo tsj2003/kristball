@@ -19,13 +19,13 @@ authRouter.post("/login", async (req, res, next) => {
   try {
     const { username, password } = loginSchema.parse(req.body);
     const user = await prisma.user.findUnique({
-      where: { username },
+      where: { username: username.trim() },
       include: { base: true },
     });
     if (!user) {
       throw new HttpError(401, "Invalid username or password");
     }
-    const matches = await bcrypt.compare(password, user.passwordHash);
+    const matches = await bcrypt.compare(password.trim(), user.passwordHash);
     if (!matches) {
       throw new HttpError(401, "Invalid username or password");
     }

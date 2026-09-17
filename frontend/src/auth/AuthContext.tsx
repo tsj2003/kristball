@@ -41,7 +41,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login: async (username, password) => {
         setError(null);
         try {
-          const res = await api.post("/auth/login", { username, password });
+          const res = await api.post("/auth/login", {
+            username: username.trim(),
+            password: password.trim(),
+          });
           localStorage.setItem("kb_token", res.data.token);
           setUser(res.data.user);
         } catch (err) {
