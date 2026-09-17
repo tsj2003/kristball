@@ -20,10 +20,14 @@ purchasesRouter.get("/", async (req, res, next) => {
       where: {
         baseId: req.scopedBaseId ?? undefined,
         equipmentTypeId,
-        purchasedAt: {
-          gte: start ? startOfDay(start) : undefined,
-          lte: end ? endOfDay(end) : undefined,
-        },
+        ...(start || end
+          ? {
+              purchasedAt: {
+                ...(start ? { gte: startOfDay(start) } : {}),
+                ...(end ? { lte: endOfDay(end) } : {}),
+              },
+            }
+          : {}),
       },
       include: {
         base: true,
@@ -76,7 +80,11 @@ purchasesRouter.post(
             purchasedById: actor.userId,
             notes: body.notes,
           },
-          include: { base: true, equipmentType: true },
+          include: {
+            base: true,
+            equipmentType: true,
+            purchasedBy: { select: { id: true, fullName: true, username: true } },
+          },
         });
         await writeAudit(tx, {
           userId: actor.userId,

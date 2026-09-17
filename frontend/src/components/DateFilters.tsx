@@ -27,7 +27,7 @@ export function DateFilters({
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <Field label="Start date">
+      <Field label="Start date (blank = all)">
         <input
           type="date"
           className={fieldClass}
@@ -35,7 +35,7 @@ export function DateFilters({
           onChange={(e) => patch({ startDate: e.target.value })}
         />
       </Field>
-      <Field label="End date">
+      <Field label="End date (blank = all)">
         <input
           type="date"
           className={fieldClass}
