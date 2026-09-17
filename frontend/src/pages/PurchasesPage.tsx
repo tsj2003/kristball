@@ -1,10 +1,14 @@
 import { FormEvent, useEffect, useState } from "react";
 import { api, apiError, Base, EquipmentType } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { DateFilters, Filters } from "../components/DateFilters";
 import { EmptyState, ErrorBanner, Field, fieldClass, Panel, primaryBtn } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
 import { formatDate, formatMoney, formatQty } from "../lib/format";
 import { toDateTimeLocal } from "../lib/format";
+
+const yearStart = `${new Date().getFullYear()}-01-01`;
+const today = new Date().toISOString().slice(0, 10);
 
 type Purchase = {
   id: string;
@@ -25,6 +29,12 @@ export function PurchasesPage() {
   const [equipment, setEquipment] = useState<EquipmentType[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [filters, setFilters] = useState<Filters>({
+    startDate: yearStart,
+    endDate: today,
+    baseId: "",
+    equipmentTypeId: "",
+  });
   const [form, setForm] = useState({
     baseId: user?.baseId ?? "",
     equipmentTypeId: "",
@@ -36,8 +46,13 @@ export function PurchasesPage() {
 
   async function load() {
     try {
+      const params: Record<string, string> = {};
+      if (filters.startDate) params.startDate = filters.startDate;
+      if (filters.endDate) params.endDate = filters.endDate;
+      if (filters.equipmentTypeId) params.equipmentTypeId = filters.equipmentTypeId;
+      if (user?.role === "ADMIN" && filters.baseId) params.baseId = filters.baseId;
       const [p, b, e] = await Promise.all([
-        api.get("/purchases"),
+        api.get("/purchases", { params }),
         api.get("/bases"),
         api.get("/equipment-types"),
       ]);
@@ -52,7 +67,7 @@ export function PurchasesPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [filters.startDate, filters.endDate, filters.equipmentTypeId, filters.baseId]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -81,6 +96,13 @@ export function PurchasesPage() {
           New stock enters a station ledger here. Quantities immediately increase cage available.
       </PageHeader>
       <ErrorBanner message={error} />
+      <DateFilters
+        filters={filters}
+        onChange={setFilters}
+        bases={bases}
+        equipment={equipment}
+        showBase={user?.role === "ADMIN"}
+      />
       {canWrite && (
         <Panel title="Record a purchase">
           <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
