@@ -4,11 +4,10 @@ import { useAuth } from "../auth/AuthContext";
 import { DateFilters, Filters } from "../components/DateFilters";
 import { EmptyState, ErrorBanner, Field, fieldClass, Panel, primaryBtn } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
-import { formatDate, formatMoney, formatQty } from "../lib/format";
-import { toDateTimeLocal } from "../lib/format";
+import { formatDateTime, formatMoney, formatQty, toDateInput, toDateTimeLocal } from "../lib/format";
 
 const yearStart = `${new Date().getFullYear()}-01-01`;
-const today = new Date().toISOString().slice(0, 10);
+const today = toDateInput();
 
 type Purchase = {
   id: string;
@@ -201,7 +200,7 @@ export function PurchasesPage() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id}>
-                    <td className="py-2 pr-3">{formatDate(row.purchasedAt)}</td>
+                    <td className="py-2 pr-3">{formatDateTime(row.purchasedAt)}</td>
                     <td className="py-2 pr-3">{row.base.name}</td>
                     <td className="py-2 pr-3">{row.equipmentType.name}</td>
                     <td className="py-2 pr-3 tabular-nums">{formatQty(row.quantity, row.equipmentType.unit)}</td>

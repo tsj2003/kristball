@@ -8,7 +8,7 @@ export function formatMoney(value: number | string) {
 }
 
 export function formatDate(value: string | Date) {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -16,7 +16,7 @@ export function formatDate(value: string | Date) {
 }
 
 export function formatDateTime(value: string | Date) {
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -32,8 +32,9 @@ export function roleLabel(role: string) {
   return role;
 }
 
-export function toDateInput(date: Date) {
-  return date.toISOString().slice(0, 10);
+export function toDateInput(date = new Date()) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 export function toDateTimeLocal(date = new Date()) {

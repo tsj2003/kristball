@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { formatDate, formatQty } from "../lib/format";
+import { formatDateTime, formatQty } from "../lib/format";
 import { ghostBtn } from "./ui";
 
 type Breakdown = {
@@ -117,7 +117,7 @@ function LineList({
                   {equipment?.name} · {extra}
                 </span>
                 <span className="tabular-nums text-muted">
-                  {formatQty(qty, equipment?.unit)} · {formatDate(when)}
+                  {formatQty(qty, equipment?.unit)} · {formatDateTime(when)}
                 </span>
               </li>
             );

@@ -4,7 +4,7 @@ import { useAuth } from "../auth/AuthContext";
 import { EmptyState, ErrorBanner, Field, fieldClass, Panel, primaryBtn } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
 import { StatusPill } from "../components/StatusPill";
-import { formatDate, formatQty, toDateTimeLocal } from "../lib/format";
+import { formatDateTime, formatQty, toDateTimeLocal } from "../lib/format";
 
 type Transfer = {
   id: string;
@@ -210,7 +210,7 @@ export function TransfersPage() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id}>
-                    <td className="py-2 pr-3">{formatDate(row.transferredAt)}</td>
+                    <td className="py-2 pr-3">{formatDateTime(row.transferredAt)}</td>
                     <td className="py-2 pr-3">
                       {row.fromBase.name} → {row.toBase.name}
                     </td>

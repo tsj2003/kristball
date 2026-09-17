@@ -10,18 +10,18 @@ export function MissionClock() {
     return () => window.clearInterval(id);
   }, []);
 
-  const dd = String(now.getUTCDate()).padStart(2, "0");
-  const hh = String(now.getUTCHours()).padStart(2, "0");
-  const mm = String(now.getUTCMinutes()).padStart(2, "0");
-  const ss = String(now.getUTCSeconds()).padStart(2, "0");
-  const mon = months[now.getUTCMonth()];
-  const yy = String(now.getUTCFullYear()).slice(-2);
-  const dtg = `${dd}${hh}${mm}Z ${mon} ${yy}`;
+  const dd = String(now.getDate()).padStart(2, "0");
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
+  const mon = months[now.getMonth()];
+  const yy = String(now.getFullYear()).slice(-2);
+  const dtg = `${dd} ${mon} ${yy}`;
 
   return (
     <div className="mono text-right text-xs text-sand" aria-live="off">
       <div className="tracking-[0.16em] text-brass">
-        {hh}:{mm}:{ss}Z
+        {hh}:{mm}:{ss}
       </div>
       <div className="text-[10px] uppercase tracking-[0.12em] text-muted">{dtg}</div>
     </div>

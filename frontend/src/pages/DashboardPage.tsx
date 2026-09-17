@@ -10,10 +10,10 @@ import { NetMovementModal } from "../components/NetMovementModal";
 import { PageHeader } from "../components/PageHeader";
 import { PersonnelHoldings } from "../components/PersonnelHoldings";
 import { SkeletonRow } from "../components/SkeletonRow";
-import { formatQty } from "../lib/format";
+import { formatQty, toDateInput } from "../lib/format";
 
 const yearStart = `${new Date().getFullYear()}-01-01`;
-const today = new Date().toISOString().slice(0, 10);
+const today = toDateInput();
 
 export function DashboardPage() {
   const { user } = useAuth();

@@ -1,5 +1,5 @@
 import { PersonnelHolding } from "../api/client";
-import { formatDate, formatQty } from "../lib/format";
+import { formatDateTime, formatQty } from "../lib/format";
 import { EmptyState } from "./ui";
 
 export function PersonnelHoldings({
@@ -52,7 +52,7 @@ export function PersonnelHoldings({
                   </button>
                 )}
               </td>
-              <td className="py-2 text-muted">{formatDate(row.assignedAt)}</td>
+              <td className="py-2 text-muted">{formatDateTime(row.assignedAt)}</td>
             </tr>
           ))}
         </tbody>
