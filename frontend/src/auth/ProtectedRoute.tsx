@@ -6,7 +6,7 @@ export function ProtectedRoute({ roles }: { roles?: Role[] }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="p-10 text-center text-muted">Restoring session…</div>;
+    return <div className="app-sky p-10 text-center text-muted">Restoring session…</div>;
   }
   if (!user) {
     return <Navigate to="/login" replace />;

@@ -67,6 +67,7 @@ async function sumTransfersIn(db: Db, scope: LedgerScope, bound: "before" | "dur
   const result = await db.transfer.aggregate({
     _sum: { quantity: true },
     where: {
+      status: "COMPLETED",
       toBaseId: scope.baseId ?? undefined,
       equipmentTypeId: scope.equipmentTypeId ?? undefined,
       transferredAt: dateClause("transferredAt", scope, bound),
@@ -79,6 +80,7 @@ async function sumTransfersOut(db: Db, scope: LedgerScope, bound: "before" | "du
   const result = await db.transfer.aggregate({
     _sum: { quantity: true },
     where: {
+      status: "COMPLETED",
       fromBaseId: scope.baseId ?? undefined,
       equipmentTypeId: scope.equipmentTypeId ?? undefined,
       transferredAt: dateClause("transferredAt", scope, bound),
@@ -136,10 +138,8 @@ export async function movementTotals(
   };
 }
 
-/**
- * Closing = Opening + NetMovement - Assigned - Expended
- * Opening is the same formula applied to every ledger row strictly before startDate.
- */
+// Closing = Opening + NetMovement - Assigned - Expended
+// Opening uses the same sums, but only rows strictly before startDate.
 export async function balanceSheet(db: Db, scope: LedgerScope): Promise<BalanceSheet> {
   const [prior, period] = await Promise.all([
     movementTotals(db, scope, "before"),
@@ -159,8 +159,7 @@ export async function availableAtBase(
   equipmentTypeId: string,
   asOf?: Date
 ): Promise<number> {
-  // Armory stock is everything received minus everything already issued to people.
-  // Expenditures reduce assigned remaining, not armory stock (the issue already left the cage).
+  // Available on base = received - assigned. Expenditures come off the assignment, not the cage.
   const scope: LedgerScope = {
     baseId,
     equipmentTypeId,
@@ -176,7 +175,7 @@ export async function availableAtBase(
 }
 
 function lockKeys(baseId: string, equipmentTypeId: string): { a: number; b: number } {
-  // Two 32-bit keys keep concurrent transfers of the same base+type from racing.
+  // Hash ids down to the two ints pg_advisory_xact_lock expects.
   const a = Math.abs(hash32(baseId)) % 2147483647;
   const b = Math.abs(hash32(equipmentTypeId)) % 2147483647;
   return { a: a || 1, b: b || 1 };
@@ -349,11 +348,13 @@ export async function netMovementBreakdown(scope: LedgerScope) {
     purchasedAt: dateClause("purchasedAt", scope, "during"),
   };
   const inWhere = {
+    status: "COMPLETED" as const,
     toBaseId: scope.baseId ?? undefined,
     equipmentTypeId: scope.equipmentTypeId ?? undefined,
     transferredAt: dateClause("transferredAt", scope, "during"),
   };
   const outWhere = {
+    status: "COMPLETED" as const,
     fromBaseId: scope.baseId ?? undefined,
     equipmentTypeId: scope.equipmentTypeId ?? undefined,
     transferredAt: dateClause("transferredAt", scope, "during"),

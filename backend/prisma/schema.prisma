@@ -19,6 +19,12 @@ enum EquipmentCategory {
   AMMUNITION
 }
 
+enum TransferStatus {
+  PENDING
+  IN_TRANSIT
+  COMPLETED
+}
+
 model Base {
   id        String   @id @default(uuid())
   name      String
@@ -46,11 +52,14 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  purchases    Purchase[]
-  transfers    Transfer[]    @relation("TransferInitiator")
-  assignments  Assignment[]
-  expenditures Expenditure[]
-  auditLogs    AuditLog[]
+  purchases     Purchase[]
+  transfers     Transfer[]    @relation("TransferInitiator")
+  assignments   Assignment[]
+  expenditures  Expenditure[]
+  auditLogs     AuditLog[]
+  apiAccessLogs ApiAccessLog[]
+
+  @@index([baseId])
 }
 
 model EquipmentType {
@@ -96,6 +105,9 @@ model Purchase {
   createdAt       DateTime      @default(now())
 
   @@index([baseId, equipmentTypeId, purchasedAt])
+  @@index([baseId])
+  @@index([equipmentTypeId])
+  @@index([createdAt])
 }
 
 model Transfer {
@@ -107,6 +119,7 @@ model Transfer {
   equipmentTypeId String
   equipmentType   EquipmentType @relation(fields: [equipmentTypeId], references: [id])
   quantity        Int
+  status          TransferStatus @default(COMPLETED)
   transferredAt   DateTime
   initiatedById   String
   initiatedBy     User          @relation("TransferInitiator", fields: [initiatedById], references: [id])
@@ -115,6 +128,11 @@ model Transfer {
 
   @@index([fromBaseId, equipmentTypeId, transferredAt])
   @@index([toBaseId, equipmentTypeId, transferredAt])
+  @@index([fromBaseId])
+  @@index([toBaseId])
+  @@index([equipmentTypeId])
+  @@index([createdAt])
+  @@index([status])
 }
 
 model Assignment {
@@ -136,6 +154,9 @@ model Assignment {
 
   @@index([baseId, equipmentTypeId, assignedAt])
   @@index([personnelId])
+  @@index([baseId])
+  @@index([equipmentTypeId])
+  @@index([createdAt])
 }
 
 model Expenditure {
@@ -150,6 +171,7 @@ model Expenditure {
   createdAt    DateTime   @default(now())
 
   @@index([assignmentId, expendedAt])
+  @@index([createdAt])
 }
 
 model AuditLog {
@@ -164,4 +186,21 @@ model AuditLog {
 
   @@index([createdAt])
   @@index([entityType, entityId])
+}
+
+// Catch-all HTTP access log written by loggerMiddleware for every API request.
+model ApiAccessLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  method     String
+  path       String
+  statusCode Int
+  durationMs Int
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+  @@index([userId])
 }

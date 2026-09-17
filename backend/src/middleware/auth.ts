@@ -38,11 +38,7 @@ export function authorizeRoles(...allowed: Role[]) {
   };
 }
 
-/**
- * Base commanders and logistics officers are locked to the base on their token.
- * Client-supplied baseId is ignored for those roles so a commander cannot pivot
- * into another installation by editing a query string or request body.
- */
+// Non-admin accounts always use the baseId from the JWT, not whatever the client sent.
 export function enforceBaseScope(req: Request, _res: Response, next: NextFunction) {
   if (!req.user) {
     return next(new HttpError(401, "Authentication required"));

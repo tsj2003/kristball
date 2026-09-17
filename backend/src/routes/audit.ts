@@ -7,6 +7,26 @@ export const auditRouter = Router();
 
 auditRouter.use(authenticateToken, authorizeRoles("ADMIN"));
 
+auditRouter.get("/access", async (req, res, next) => {
+  try {
+    const startDate = parseOptionalDate(req.query.startDate);
+    const endDate = parseOptionalDate(req.query.endDate);
+    const logs = await prisma.apiAccessLog.findMany({
+      where: {
+        createdAt: { gte: startDate, lte: endDate },
+      },
+      include: {
+        user: { select: { id: true, username: true, fullName: true, role: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 300,
+    });
+    res.json({ logs });
+  } catch (err) {
+    next(err);
+  }
+});
+
 auditRouter.get("/", async (req, res, next) => {
   try {
     const startDate = parseOptionalDate(req.query.startDate);

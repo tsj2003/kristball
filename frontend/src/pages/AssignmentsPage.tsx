@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { api, apiError, Base, EquipmentType, Person, PersonnelHolding } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { EmptyState, ErrorBanner, Field, fieldClass, ghostBtn, Panel, primaryBtn } from "../components/ui";
+import { PageHeader } from "../components/PageHeader";
 import { PersonnelHoldings } from "../components/PersonnelHoldings";
 import { formatQty, toDateTimeLocal } from "../lib/format";
 
@@ -97,13 +98,10 @@ export function AssignmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="display text-3xl">Assignments & expenditures</h1>
-        <p className="mt-1 text-sm text-muted">
-          Issuing equipment to a person reduces armory stock. Recording an expenditure reduces that person&apos;s
-          remaining quantity automatically.
-        </p>
-      </div>
+      <PageHeader kicker="ARMIGER // ISSUE" title="Issue & expend">
+        Issuing equipment to a person reduces cage stock. Recording an expenditure reduces that person's remaining
+        quantity automatically.
+      </PageHeader>
       <ErrorBanner message={error} />
 
       {canWrite && (

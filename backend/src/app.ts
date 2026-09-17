@@ -10,6 +10,7 @@ import { transfersRouter } from "./routes/transfers";
 import { assignmentsRouter } from "./routes/assignments";
 import { auditRouter } from "./routes/audit";
 import { errorHandler, notFound } from "./middleware/errorHandler";
+import { loggerMiddleware } from "./middleware/logger";
 
 export const app = express();
 
@@ -23,10 +24,15 @@ app.use(
   })
 );
 app.use(express.json({ limit: "1mb" }));
+app.use(loggerMiddleware);
 
-app.get("/api/health", (_req, res) => {
+function health(_req: express.Request, res: express.Response) {
   res.json({ status: "ok", service: "kristallball-api" });
-});
+}
+
+app.get("/", health);
+app.get("/health", health);
+app.get("/api/health", health);
 
 app.use("/api/auth", authRouter);
 app.use("/api", referenceRouter);

@@ -15,7 +15,8 @@
     "db:generate": "npm run prisma:generate -w backend",
     "db:migrate": "npm run prisma:migrate -w backend",
     "db:seed": "npm run prisma:seed -w backend",
-    "db:setup": "npm run db:migrate && npm run db:seed"
+    "db:setup": "npm run db:migrate && npm run db:seed",
+    "pack:submission": "bash scripts/pack-submission.sh"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

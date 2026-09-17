@@ -26,9 +26,9 @@ export function formatDateTime(value: string | Date) {
 }
 
 export function roleLabel(role: string) {
-  if (role === "ADMIN") return "Administrator";
-  if (role === "BASE_COMMANDER") return "Base Commander";
-  if (role === "LOGISTICS_OFFICER") return "Logistics Officer";
+  if (role === "ADMIN") return "J4 Admin";
+  if (role === "BASE_COMMANDER") return "Station CO";
+  if (role === "LOGISTICS_OFFICER") return "G4 Logistics";
   return role;
 }
 

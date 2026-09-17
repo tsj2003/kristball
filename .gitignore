@@ -11,3 +11,6 @@ uploads
 backend/generated
 frontend/dist
 *.tsbuildinfo
+submission/*.zip
+submission/dump.sql
+.cursor

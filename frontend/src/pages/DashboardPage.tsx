@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { api, apiError, Base, EquipmentType, Holding, PersonnelHolding, Summary } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { DateFilters, Filters } from "../components/DateFilters";
-import { EmptyState, ErrorBanner, Panel } from "../components/ui";
+import { ErrorBanner, Panel } from "../components/ui";
+import { HoldingsChart } from "../components/HoldingsChart";
 import { HoldingsTable } from "../components/HoldingsTable";
 import { MetricCards } from "../components/MetricCards";
 import { NetMovementModal } from "../components/NetMovementModal";
+import { PageHeader } from "../components/PageHeader";
 import { PersonnelHoldings } from "../components/PersonnelHoldings";
+import { SkeletonRow } from "../components/SkeletonRow";
 import { formatQty } from "../lib/format";
 
 const yearStart = `${new Date().getFullYear()}-01-01`;
@@ -91,21 +94,21 @@ export function DashboardPage() {
   }
 
   const headline = isCommander
-    ? `${user?.base?.name ?? "Your base"} — current holdings and personnel remaining`
+    ? `${user?.base?.name ?? "Your station"} — cage stock and remaining on issue`
     : isLogistics
-      ? "Movement desk — purchases, inbound, and outbound stock"
-      : "Force-wide ledger and current on-hand picture";
+      ? "Inbound, outbound, and what is still in the cage"
+      : "Force-wide ledger. Opening, net, closing — computed, not stored.";
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="display text-3xl text-ink">
-          {isCommander ? "Base command" : isLogistics ? "Logistics desk" : "Force dashboard"}
-        </h1>
-        <p className="mt-1 max-w-3xl text-sm text-muted">{headline}</p>
-      </div>
+      <PageHeader
+        kicker="ARMIGER // SITREP"
+        title={isCommander ? "Station sitrep" : isLogistics ? "Movement desk" : "Force sitrep"}
+      >
+        {headline}
+      </PageHeader>
 
-      <Panel title="Ledger window">
+      <Panel title="Window">
         <DateFilters
           filters={filters}
           onChange={setFilters}
@@ -121,19 +124,18 @@ export function DashboardPage() {
 
       <ErrorBanner message={error} />
 
-      {loading && !summary ? (
-        <Panel title="Metrics">
-          <EmptyState>Loading ledger totals…</EmptyState>
-        </Panel>
-      ) : (
-        summary && <MetricCards summary={summary} onNetClick={openNet} />
-      )}
+      {loading && !summary ? <SkeletonRow rows={3} /> : summary && <MetricCards summary={summary} onNetClick={openNet} />}
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <Panel title={isLogistics ? "Stock available to move" : "What is held now"}>
+        <Panel title={isLogistics ? "Cage available" : "On hand now"}>
           <HoldingsTable rows={holdings} showBase={Boolean(isAdmin && !filters.baseId)} />
         </Panel>
-        <Panel title={isCommander ? "Personnel remaining quantities" : "Assigned to personnel"}>
+        <Panel title="Available by class">
+          <HoldingsChart rows={holdings} />
+        </Panel>
+      </div>
+      <div className="grid gap-6">
+        <Panel title={isCommander ? "Remaining on issue" : "Issued to personnel"}>
           {isLogistics ? (
             <div className="space-y-3">
               <p className="text-sm text-muted">
@@ -148,12 +150,12 @@ export function DashboardPage() {
       </div>
 
       {isCommander && (
-        <Panel title="Watch item">
+        <Panel title="Watch">
           {people
             .filter((row) => row.category === "AMMUNITION")
             .slice(0, 3)
             .map((row) => (
-              <div key={row.assignmentId} className="border border-line bg-field/40 px-4 py-3">
+              <div key={row.assignmentId} className="plate px-4 py-3">
                 <div className="text-sm">
                   {row.rank} {row.personnelName} holds {formatQty(row.remaining, row.unit)} of {row.equipmentName}{" "}
                   remaining

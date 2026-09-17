@@ -17,9 +17,9 @@ export function PersonnelHoldings({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] text-left text-sm">
-        <thead className="text-[11px] uppercase tracking-widest text-muted">
-          <tr className="border-b border-line">
+      <table className="data-table min-w-[760px]">
+        <thead>
+          <tr>
             <th className="py-2 pr-3 font-medium">Personnel</th>
             <th className="py-2 pr-3 font-medium">Equipment</th>
             <th className="py-2 pr-3 font-medium">Assigned</th>
@@ -30,7 +30,7 @@ export function PersonnelHoldings({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.assignmentId} className="border-b border-line/70">
+            <tr key={row.assignmentId}>
               <td className="py-2 pr-3">
                 <div>
                   {row.rank} {row.personnelName}

@@ -2,16 +2,20 @@
 
 @theme {
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Barlow Condensed", "IBM Plex Sans", sans-serif;
-  --color-ink: #e7eadc;
-  --color-muted: #9aa392;
-  --color-brass: #c4a35a;
-  --color-olive: #8fad70;
-  --color-field: #10140f;
-  --color-panel: #1b2218;
-  --color-line: #2d3a28;
-  --color-danger: #c45c4a;
-  --color-ok: #7dba7a;
+  --font-display: "Teko", "IBM Plex Sans", sans-serif;
+  --font-mark: "Black Ops One", "Teko", sans-serif;
+  --font-mono: "Share Tech Mono", ui-monospace, monospace;
+  --color-ink: #f3ead8;
+  --color-muted: #b7a88a;
+  --color-brass: #e8a54b;
+  --color-olive: #7ec8c2;
+  --color-field: #0b0e11;
+  --color-panel: #12171c;
+  --color-line: #3d463c;
+  --color-danger: #d46a54;
+  --color-ok: #7ec8c2;
+  --color-sand: #c9b089;
+  --color-night: #07090b;
 }
 
 html,
@@ -20,21 +24,291 @@ body,
   min-height: 100%;
 }
 
+::selection {
+  background: rgba(232, 165, 75, 0.35);
+  color: #f3ead8;
+}
+
 body {
   margin: 0;
-  background: radial-gradient(1200px 600px at 10% -10%, #24301f 0%, #10140f 45%, #0c100b 100%);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  background: var(--color-night);
 }
 
 .display {
   font-family: var(--font-display);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.mark {
+  font-family: var(--font-mark);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.app-sky,
+.login-sky {
+  min-height: 100dvh;
+  background-color: var(--color-night);
+  background-size: cover;
+  background-position: center 35%;
+  background-attachment: fixed;
+}
+
+.app-sky {
+  background-image:
+    radial-gradient(120% 80% at 50% 10%, rgba(7, 9, 11, 0.2), rgba(7, 9, 11, 0.78) 55%, rgba(7, 9, 11, 0.94)),
+    url("/armiger-hangar.jpg");
+}
+
+.login-sky {
+  background-image:
+    linear-gradient(90deg, rgba(7, 9, 11, 0.9) 0%, rgba(7, 9, 11, 0.5) 38%, rgba(7, 9, 11, 0.18) 100%),
+    linear-gradient(180deg, rgba(7, 9, 11, 0.15) 0%, rgba(7, 9, 11, 0.55) 100%),
+    url("/armiger-hangar.jpg");
+  background-position: center 40%;
+}
+
+.app-sky::before,
+.login-sky::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(232, 165, 75, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 165, 75, 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.app-sky::after,
+.login-sky::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.plate {
+  position: relative;
+  border: 1px solid color-mix(in oklab, var(--color-sand) 22%, transparent);
+  background:
+    linear-gradient(var(--color-brass), var(--color-brass)) top left / 14px 2px no-repeat,
+    linear-gradient(var(--color-brass), var(--color-brass)) top left / 2px 14px no-repeat,
+    linear-gradient(var(--color-brass), var(--color-brass)) top right / 14px 2px no-repeat,
+    linear-gradient(var(--color-brass), var(--color-brass)) top right / 2px 14px no-repeat,
+    linear-gradient(var(--color-brass), var(--color-brass)) bottom left / 14px 2px no-repeat,
+    linear-gradient(var(--color-brass), var(--color-brass)) bottom left / 2px 14px no-repeat,
+    linear-gradient(var(--color-brass), var(--color-brass)) bottom right / 14px 2px no-repeat,
+    linear-gradient(var(--color-brass), var(--color-brass)) bottom right / 2px 14px no-repeat,
+    color-mix(in oklab, var(--color-panel) 80%, transparent);
+  backdrop-filter: blur(16px) saturate(1.1);
+  animation: rise 420ms ease-out both;
+}
+
+.hero-plate {
+  background-color: color-mix(in oklab, var(--color-panel) 72%, transparent);
+}
+
+.hero-plate.net {
+  background:
+    linear-gradient(135deg, rgba(232, 165, 75, 0.18), rgba(12, 16, 18, 0.2)),
+    color-mix(in oklab, var(--color-panel) 70%, transparent);
+}
+
+.class-tape {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  background: #8b1e16;
+  color: #f3ead8;
+  text-align: center;
+  padding: 6px 12px;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: #f3ead8;
+  box-shadow: 0 0 8px #f3ead8;
+  animation: pulse 1.8s ease-in-out infinite;
+  vertical-align: middle;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.data-table thead {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.7rem 0.75rem 0.7rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--color-line) 70%, transparent);
+}
+
+.data-table tbody tr {
+  transition: background-color 160ms ease;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(232, 165, 75, 0.06);
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.pill-pending {
+  color: var(--color-sand);
+}
+
+.pill-transit {
+  color: var(--color-brass);
+}
+
+.pill-done {
+  color: var(--color-olive);
+}
+
+.skeleton {
+  height: 4.5rem;
+  background: linear-gradient(90deg, rgba(243, 234, 216, 0.04), rgba(232, 165, 75, 0.12), rgba(243, 234, 216, 0.04));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.watermark {
+  font-family: var(--font-mark);
+  font-size: clamp(4rem, 12vw, 9rem);
+  letter-spacing: 0.2em;
+  color: rgba(243, 234, 216, 0.08);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  user-select: none;
+  pointer-events: none;
 }
 
 input,
 select,
 textarea {
   color-scheme: dark;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible {
+  outline: 2px solid var(--color-brass);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-sand) 40%, transparent);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  clip: auto;
+  overflow: visible;
+  white-space: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-sky,
+  .login-sky {
+    background-attachment: scroll;
+  }
+
+  .plate,
+  .skeleton,
+  .live-dot {
+    animation: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-sky,
+  .login-sky {
+    background-attachment: scroll;
+  }
 }

@@ -1,0 +1,262 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 4 /Kids [3 0 R 4 0 R 5 0 R 6 0 R] /MediaBox [0 0 612 792] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 11 0 R >> >> /Contents 7 0 R >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 11 0 R >> >> /Contents 8 0 R >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 11 0 R >> >> /Contents 9 0 R >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 11 0 R >> >> /Contents 10 0 R >>
+endobj
+7 0 obj
+<< /Length 2554 >>
+stream
+BT
+/F1 10 Tf
+12 TL
+48 744 Td
+(# Kristallball ? Military Asset Management) Tj T*
+() Tj T*
+(**Documentation report**) Tj T*
+(Military Asset Management System \(vehicles, weapons, ammunition\) across multiple bases.) Tj T*
+() Tj T*
+(## 1. Purpose) Tj T*
+() Tj T*
+(Kristallball is a web app for base-level stock. Purchases, transfers, assignments, and) Tj T*
+(expenditures are the source of truth. Opening balance, net movement, available armory stock,) Tj T*
+(and remaining assigned quantity are computed from those rows. They are not stored as a) Tj T*
+(mutable current-balance field.) Tj T*
+() Tj T*
+(The console is a React SPA. The API is Express + Prisma on PostgreSQL. Role-based access) Tj T*
+(control scopes Base Commanders and Logistics Officers to the installation on their JWT.) Tj T*
+() Tj T*
+(## 2. Architecture) Tj T*
+() Tj T*
+(```) Tj T*
+(Browser \(React + Vite + Tailwind, port 4521\)) Tj T*
+(?  /api  \(Vite proxy in development\)) Tj T*
+(?) Tj T*
+(Express API \(TypeScript, port 4522\)) Tj T*
+(?  Helmet, CORS, JSON body parser, loggerMiddleware) Tj T*
+(?  JWT authenticateToken ? authorizeRoles ? enforceBaseScope) Tj T*
+(?) Tj T*
+(PostgreSQL 16 \(Docker Compose, port 5432\)) Tj T*
+(Prisma ORM + advisory locks for concurrent stock writes) Tj T*
+(```) Tj T*
+() Tj T*
+(Tech stack:) Tj T*
+() Tj T*
+(| Layer | Choice |) Tj T*
+(| --- | --- |) Tj T*
+(| Frontend | React 19, Vite 6, Tailwind CSS 4, Axios, Lucide, Recharts, Chart.js |) Tj T*
+(| Backend | Node.js, Express, TypeScript, Zod |) Tj T*
+(| Database | PostgreSQL via Prisma |) Tj T*
+(| Auth | JWT \(`userId`, `role`, `baseId`\), bcryptjs password hashes |) Tj T*
+(| API testing | Postman collection at `postman/Kristallball.postman_collection.json` |) Tj T*
+() Tj T*
+(## 3. Inventory formulas) Tj T*
+() Tj T*
+(```) Tj T*
+(NetMovement = Purchases + TransfersIn ? TransfersOut) Tj T*
+(Opening     = NetMovement_before_start ? Assigned_before ? Expended_before) Tj T*
+(Closing     = Opening + NetMovement ? Assigned ? Expended) Tj T*
+(```) Tj T*
+() Tj T*
+(Only **COMPLETED** transfers are included in TransfersIn / TransfersOut.) Tj T*
+() Tj T*
+(Current holdings \(independent of the date-window cards\):) Tj T*
+() Tj T*
+(```) Tj T*
+(Received           = Purchases + In ? Out     \(as of end date\)) Tj T*
+(Available          = Received ? Assigned      \(still in the armory\)) Tj T*
+(Assigned remaining = Assigned ? Expended      \(what a person still holds\)) Tj T*
+(```) Tj T*
+() Tj T*
+(Example: PFC James Okonkwo is issued 10,000 rounds and expends 5,000. Remaining on that) Tj T*
+ET
+endstream
+endobj
+8 0 obj
+<< /Length 2656 >>
+stream
+BT
+/F1 10 Tf
+12 TL
+48 744 Td
+(assignment is 5,000.) Tj T*
+() Tj T*
+(## 4. ER schema) Tj T*
+() Tj T*
+(```) Tj T*
+(Base 1??* User) Tj T*
+(Base 1??* Personnel) Tj T*
+(Base 1??* Purchase *??1 EquipmentType) Tj T*
+(Base 1??* Assignment *??1 Personnel) Tj T*
+(Assignment 1??* Expenditure) Tj T*
+(Transfer.fromBase / Transfer.toBase ? Base) Tj T*
+(User 1??* AuditLog) Tj T*
+(User 1??* ApiAccessLog) Tj T*
+(```) Tj T*
+() Tj T*
+(There is no `Assets` current-qty table. Quantity is always derived. That avoids two writers) Tj T*
+(disagreeing on a cached balance.) Tj T*
+() Tj T*
+(High-query indexes exist on `baseId`, `equipmentTypeId`, and `createdAt` \(and date columns) Tj T*
+(used in the ledger window\).) Tj T*
+() Tj T*
+(Transfer `status`: `PENDING` ? `IN_TRANSIT` ? `COMPLETED`. Stock leaves the origin only when) Tj T*
+(the row becomes COMPLETED, inside a transaction that takes `pg_advisory_xact_lock\(base,) Tj T*
+(equipmentType\)` and re-checks available quantity.) Tj T*
+() Tj T*
+(## 5. RBAC matrix) Tj T*
+() Tj T*
+(| Capability | ADMIN | BASE_COMMANDER | LOGISTICS_OFFICER |) Tj T*
+(| --- | --- | --- | --- |) Tj T*
+(| Dashboard \(opening / net / closing\) | All bases | Own base | Own base |) Tj T*
+(| Holdings & personnel remaining | All | Own | Own \(read\) |) Tj T*
+(| Create purchase | Yes | No | Own base |) Tj T*
+(| Create / complete transfer | Any origin | No | Origin = own base |) Tj T*
+(| Assign / record expenditure | Yes | Own base | No |) Tj T*
+(| Audit log + HTTP access log | Yes | No | No |) Tj T*
+() Tj T*
+(`enforceBaseScope` overwrites client `baseId` / `fromBaseId` from the JWT for non-admins.) Tj T*
+() Tj T*
+(## 6. API endpoints) Tj T*
+() Tj T*
+(Authenticated unless noted. Bearer JWT.) Tj T*
+() Tj T*
+(| Method | Path | Notes |) Tj T*
+(| --- | --- | --- |) Tj T*
+(| GET | `/api/health` | Public |) Tj T*
+(| POST | `/api/auth/login` | Public; writes LOGIN audit |) Tj T*
+(| GET | `/api/auth/me` | Current user |) Tj T*
+(| GET | `/api/bases` | Reference |) Tj T*
+(| GET | `/api/equipment-types` | Reference |) Tj T*
+(| GET | `/api/personnel` | Scoped to base for non-admin |) Tj T*
+(| GET | `/api/dashboard/summary` | Opening / net / closing |) Tj T*
+(| GET | `/api/dashboard/holdings` | Available + remaining |) Tj T*
+(| GET | `/api/dashboard/personnel-holdings` | Per-person remaining |) Tj T*
+(| GET | `/api/dashboard/net-movement` | Modal breakdown |) Tj T*
+(| GET/POST | `/api/purchases` | Logistics + admin write |) Tj T*
+(| GET/POST | `/api/transfers` | COMPLETED is stock-checked |) Tj T*
+(| PATCH | `/api/transfers/:id/status` | Advance status |) Tj T*
+(| GET/POST | `/api/assignments` | Commander + admin write |) Tj T*
+ET
+endstream
+endobj
+9 0 obj
+<< /Length 2486 >>
+stream
+BT
+/F1 10 Tf
+12 TL
+48 744 Td
+(| GET/POST | `/api/assignments/expenditures` | Remaining-qty check |) Tj T*
+(| GET | `/api/audit-logs` | Admin mutation audit |) Tj T*
+(| GET | `/api/audit-logs/access` | Admin HTTP access log |) Tj T*
+() Tj T*
+(Query filters: `startDate`, `endDate`, `baseId` \(admin\), `equipmentTypeId`.) Tj T*
+() Tj T*
+(## 7. Audit model) Tj T*
+() Tj T*
+(Two logs, on purpose:) Tj T*
+() Tj T*
+(1. **AuditLog** ? written *inside* the same Prisma transaction as a purchase, transfer,) Tj T*
+(assignment, expenditure, or login. If the mutation rolls back, the audit row rolls back.) Tj T*
+(2. **ApiAccessLog** ? written by `loggerMiddleware` after every `/api` response except) Tj T*
+(health. Stores method, path, status, duration, user. **Never stores request bodies**, so) Tj T*
+(passwords cannot leak into the log.) Tj T*
+() Tj T*
+(## 8. Local setup) Tj T*
+() Tj T*
+(Requires Node 20+ and Docker Desktop \(PostgreSQL 16\).) Tj T*
+() Tj T*
+(```bash) Tj T*
+(cp .env.example .env) Tj T*
+(cp .env.example backend/.env) Tj T*
+(cp frontend/.env.example frontend/.env) Tj T*
+(# set JWT_SECRET in .env and backend/.env) Tj T*
+() Tj T*
+(docker compose up -d) Tj T*
+(npm install) Tj T*
+(npm run db:setup) Tj T*
+(npm run dev) Tj T*
+(```) Tj T*
+() Tj T*
+(- Console: http://localhost:4521) Tj T*
+(- API: http://localhost:4522/api/health) Tj T*
+() Tj T*
+(Import `postman/Kristallball.postman_collection.json` and run **Auth ? Login as admin**.) Tj T*
+() Tj T*
+(## 9. Sample test credentials) Tj T*
+() Tj T*
+(| Username | Password | Role | Scope |) Tj T*
+(| --- | --- | --- | --- |) Tj T*
+(| `admin_user` | `AdminPass123!` | ADMIN | All bases + audit |) Tj T*
+(| `commander_alpha` | `CommandPass123!` | BASE_COMMANDER | Fort Alpha |) Tj T*
+(| `logistics_officer` | `LogisticsPass123!` | LOGISTICS_OFFICER | Fort Alpha |) Tj T*
+() Tj T*
+(Seed story: Fort Alpha / Fort Bravo / Station Charlie; Humvees, FMTV trucks, M4A1s, AK-47s,) Tj T*
+(5.56 and 9mm lots; PFC James Okonkwo 10,000 rounds assigned / 5,000 remaining.) Tj T*
+() Tj T*
+(## 10. Submission artifacts) Tj T*
+() Tj T*
+(| Artifact | Location |) Tj T*
+(| --- | --- |) Tj T*
+(| Source archive | `npm run pack:submission` ? `submission/kristallball-source.zip` |) Tj T*
+(| Schema DDL | `docs/schema.sql` |) Tj T*
+(| Optional data dump | `submission/dump.sql` \(generated by `npm run pack:submission` when) Tj T*
+(Postgres is running\) |) Tj T*
+(| This report | `docs/Kristallball-Documentation.md` and `.pdf` |) Tj T*
+() Tj T*
+ET
+endstream
+endobj
+10 0 obj
+<< /Length 550 >>
+stream
+BT
+/F1 10 Tf
+12 TL
+48 744 Td
+(## 11. Free hosting) Tj T*
+() Tj T*
+(Render free web services stop after ~15 minutes without HTTP traffic. Point a free monitor) Tj T*
+(\(UptimeRobot or cron-job.org, 5 minute interval\) at `/api/health`. The API also pings itself) Tj T*
+(in production \(`RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN` / `KEEP_AWAKE_URL`\), and the) Tj T*
+(browser console pings the same route while a tab is open. GitHub Actions workflow) Tj T*
+(`.github/workflows/ping.yml` can curl `KEEP_AWAKE_URLS` on a 5 minute schedule.) Tj T*
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000157 00000 n 
+0000000260 00000 n 
+0000000363 00000 n 
+0000000466 00000 n 
+0000000570 00000 n 
+0000003176 00000 n 
+0000005884 00000 n 
+0000008422 00000 n 
+0000009024 00000 n 
+trailer
+<< /Size 12 /Root 1 0 R >>
+startxref
+9093
+%%EOF

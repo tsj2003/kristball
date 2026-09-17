@@ -8,34 +8,41 @@ export function MetricCards({
   summary: Summary;
   onNetClick: () => void;
 }) {
-  const cards = [
-    { key: "opening", label: "Opening balance", value: summary.opening, hint: "Activity before start date" },
-    { key: "purchases", label: "Purchases", value: summary.purchases },
-    { key: "in", label: "Transfers in", value: summary.transfersIn },
-    { key: "out", label: "Transfers out", value: summary.transfersOut },
-    { key: "net", label: "Net movement", value: summary.netMovement, action: true },
-    { key: "assigned", label: "Assigned", value: summary.assigned, hint: "Issued to personnel this period" },
-    { key: "expended", label: "Expended", value: summary.expended },
-    { key: "closing", label: "Closing balance", value: summary.closing, hint: "Opening + net − assigned − expended" },
+  const secondary = [
+    { label: "Purchases", value: summary.purchases },
+    { label: "Transfers in", value: summary.transfersIn },
+    { label: "Transfers out", value: summary.transfersOut },
+    { label: "Assigned", value: summary.assigned },
+    { label: "Expended", value: summary.expended },
   ];
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      {cards.map((card) => (
-        <button
-          key={card.key}
-          type="button"
-          onClick={card.action ? onNetClick : undefined}
-          className={`border border-line bg-field/60 px-4 py-3 text-left ${
-            card.action ? "hover:border-brass" : ""
-          }`}
-        >
-          <div className="text-[11px] uppercase tracking-[0.16em] text-muted">{card.label}</div>
-          <div className="mt-1 font-medium text-2xl tabular-nums text-ink">{formatQty(card.value)}</div>
-          {card.hint && <div className="mt-1 text-[11px] text-muted">{card.hint}</div>}
-          {card.action && <div className="mt-1 text-[11px] text-brass">View breakdown</div>}
+    <div className="space-y-3">
+      <div className="grid gap-3 lg:grid-cols-3">
+        <div className="plate hero-plate px-5 py-5">
+          <div className="text-[11px] uppercase tracking-[0.2em] text-muted">Opening</div>
+          <div className="mono mt-2 text-4xl text-ink sm:text-5xl">{formatQty(summary.opening)}</div>
+          <div className="mt-2 text-[11px] text-muted">Activity before the window</div>
+        </div>
+        <button type="button" onClick={onNetClick} className="plate hero-plate net cursor-pointer px-5 py-5 text-left">
+          <div className="text-[11px] uppercase tracking-[0.2em] text-brass">Net movement</div>
+          <div className="mono mt-2 text-4xl text-brass sm:text-5xl">{formatQty(summary.netMovement)}</div>
+          <div className="mt-2 text-[11px] uppercase tracking-[0.16em] text-sand">Click for purchases · in · out</div>
         </button>
-      ))}
+        <div className="plate hero-plate px-5 py-5">
+          <div className="text-[11px] uppercase tracking-[0.2em] text-muted">Closing</div>
+          <div className="mono mt-2 text-4xl text-ink sm:text-5xl">{formatQty(summary.closing)}</div>
+          <div className="mt-2 text-[11px] text-muted">Opening + net − assigned − expended</div>
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {secondary.map((card) => (
+          <div key={card.label} className="plate px-4 py-3">
+            <div className="text-[11px] uppercase tracking-[0.16em] text-muted">{card.label}</div>
+            <div className="mono mt-1 text-xl text-ink">{formatQty(card.value)}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

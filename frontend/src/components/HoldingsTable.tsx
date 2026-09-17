@@ -9,9 +9,9 @@ export function HoldingsTable({ rows, showBase }: { rows: Holding[]; showBase: b
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] text-left text-sm">
-        <thead className="text-[11px] uppercase tracking-widest text-muted">
-          <tr className="border-b border-line">
+      <table className="data-table min-w-[720px]">
+        <thead>
+          <tr>
             {showBase && <th className="py-2 pr-3 font-medium">Base</th>}
             <th className="py-2 pr-3 font-medium">Equipment</th>
             <th className="py-2 pr-3 font-medium">Received</th>
@@ -22,7 +22,7 @@ export function HoldingsTable({ rows, showBase }: { rows: Holding[]; showBase: b
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={`${row.baseId}-${row.equipmentTypeId}`} className="border-b border-line/70">
+            <tr key={`${row.baseId}-${row.equipmentTypeId}`}>
               {showBase && (
                 <td className="py-2 pr-3">
                   {row.baseName}

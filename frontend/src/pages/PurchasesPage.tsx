@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { api, apiError, Base, EquipmentType } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { EmptyState, ErrorBanner, Field, fieldClass, Panel, primaryBtn } from "../components/ui";
+import { PageHeader } from "../components/PageHeader";
 import { formatDate, formatMoney, formatQty } from "../lib/format";
 import { toDateTimeLocal } from "../lib/format";
 
@@ -76,12 +77,9 @@ export function PurchasesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="display text-3xl">Purchases</h1>
-        <p className="mt-1 text-sm text-muted">
-          New stock enters a base ledger here. Quantities immediately increase available armory stock.
-        </p>
-      </div>
+      <PageHeader kicker="ARMIGER // INBOUND" title="Inbound">
+          New stock enters a station ledger here. Quantities immediately increase cage available.
+      </PageHeader>
       <ErrorBanner message={error} />
       {canWrite && (
         <Panel title="Record a purchase">
@@ -167,9 +165,9 @@ export function PurchasesPage() {
           <EmptyState>No purchases recorded yet.</EmptyState>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="text-[11px] uppercase tracking-widest text-muted">
-                <tr className="border-b border-line">
+            <table className="data-table min-w-[800px]">
+              <thead>
+                <tr>
                   <th className="py-2 pr-3 font-medium">When</th>
                   <th className="py-2 pr-3 font-medium">Base</th>
                   <th className="py-2 pr-3 font-medium">Equipment</th>
@@ -180,7 +178,7 @@ export function PurchasesPage() {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.id} className="border-b border-line/70">
+                  <tr key={row.id}>
                     <td className="py-2 pr-3">{formatDate(row.purchasedAt)}</td>
                     <td className="py-2 pr-3">{row.base.name}</td>
                     <td className="py-2 pr-3">{row.equipmentType.name}</td>

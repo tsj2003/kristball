@@ -29,11 +29,11 @@ export function NetMovementModal({
     : [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto border border-line bg-panel p-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-night/70 px-4 backdrop-blur-sm">
+      <div className="plate max-h-[90vh] w-full max-w-3xl overflow-y-auto p-5">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h2 className="display text-2xl text-brass">Net movement</h2>
+            <h2 className="display text-3xl text-brass">Net movement</h2>
             <p className="text-sm text-muted">Purchases + transfers in − transfers out</p>
           </div>
           <button type="button" className={ghostBtn} onClick={onClose}>
@@ -53,13 +53,13 @@ export function NetMovementModal({
             <div className="mb-6 h-52">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chart}>
-                  <CartesianGrid stroke="#2d3a28" vertical={false} />
-                  <XAxis dataKey="name" stroke="#9aa392" fontSize={12} />
-                  <YAxis stroke="#9aa392" fontSize={12} />
+                  <CartesianGrid stroke="#3d463c" vertical={false} />
+                  <XAxis dataKey="name" stroke="#b7a88a" fontSize={12} />
+                  <YAxis stroke="#b7a88a" fontSize={12} />
                   <Tooltip
-                    contentStyle={{ background: "#1b2218", border: "1px solid #2d3a28", color: "#e7eadc" }}
+                    contentStyle={{ background: "#12171c", border: "1px solid #3d463c", color: "#f3ead8" }}
                   />
-                  <Bar dataKey="qty" fill="#c4a35a" />
+                  <Bar dataKey="qty" fill="#e8a54b" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -75,7 +75,7 @@ export function NetMovementModal({
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="border border-line bg-field/50 px-3 py-2">
+    <div className="plate px-3 py-2">
       <div className="text-[11px] uppercase tracking-widest text-muted">{label}</div>
       <div className="tabular-nums text-lg">{formatQty(value)}</div>
     </div>

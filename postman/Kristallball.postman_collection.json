@@ -1,0 +1,328 @@
+{
+  "info": {
+    "name": "Kristallball Military Asset Management",
+    "description": "REST collection for the Kristallball API. Run Auth → Login as admin first so the JWT is stored in the collection variable `token`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4522" },
+    { "key": "token", "value": "" },
+    { "key": "baseId", "value": "" },
+    { "key": "equipmentTypeId", "value": "" },
+    { "key": "personnelId", "value": "" },
+    { "key": "assignmentId", "value": "" },
+    { "key": "transferId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "API health",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login as admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.token) pm.collectionVariables.set('token', data.token);",
+                  "if (data.user && data.user.baseId) pm.collectionVariables.set('baseId', data.user.baseId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin_user\",\n  \"password\": \"AdminPass123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login as commander",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.token) pm.collectionVariables.set('token', data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"commander_alpha\",\n  \"password\": \"CommandPass123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login as logistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.token) pm.collectionVariables.set('token', data.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"logistics_officer\",\n  \"password\": \"LogisticsPass123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Current user",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reference",
+      "item": [
+        {
+          "name": "List bases",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.bases && data.bases[0]) pm.collectionVariables.set('baseId', data.bases[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/bases" }
+        },
+        {
+          "name": "List equipment types",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.equipmentTypes && data.equipmentTypes[0]) pm.collectionVariables.set('equipmentTypeId', data.equipmentTypes[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/equipment-types" }
+        },
+        {
+          "name": "List personnel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.personnel && data.personnel[0]) pm.collectionVariables.set('personnelId', data.personnel[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/personnel" }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Summary",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/summary?startDate=2026-01-01&endDate=2026-12-31"
+          }
+        },
+        {
+          "name": "Holdings",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/dashboard/holdings" }
+        },
+        {
+          "name": "Personnel holdings",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/dashboard/personnel-holdings" }
+        },
+        {
+          "name": "Net movement breakdown",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/dashboard/net-movement?startDate=2026-01-01&endDate=2026-12-31" }
+        }
+      ]
+    },
+    {
+      "name": "Purchases",
+      "item": [
+        {
+          "name": "List purchases",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/purchases" }
+        },
+        {
+          "name": "Create purchase",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseId\": \"{{baseId}}\",\n  \"equipmentTypeId\": \"{{equipmentTypeId}}\",\n  \"quantity\": 5,\n  \"unitCost\": 100,\n  \"purchasedAt\": \"2026-09-17T12:00:00.000Z\",\n  \"notes\": \"Postman purchase\"\n}"
+            },
+            "url": "{{baseUrl}}/api/purchases"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transfers",
+      "item": [
+        {
+          "name": "List transfers",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/transfers" }
+        },
+        {
+          "name": "Create completed transfer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.transfer) pm.collectionVariables.set('transferId', data.transfer.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromBaseId\": \"{{baseId}}\",\n  \"toBaseId\": \"{{baseId}}\",\n  \"equipmentTypeId\": \"{{equipmentTypeId}}\",\n  \"quantity\": 1,\n  \"transferredAt\": \"2026-09-17T12:00:00.000Z\",\n  \"status\": \"COMPLETED\",\n  \"notes\": \"Replace toBaseId with a different base before sending\"\n}"
+            },
+            "url": "{{baseUrl}}/api/transfers"
+          }
+        },
+        {
+          "name": "Patch transfer status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+            },
+            "url": "{{baseUrl}}/api/transfers/{{transferId}}/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Assignments",
+      "item": [
+        {
+          "name": "List assignments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.assignments && data.assignments[0]) pm.collectionVariables.set('assignmentId', data.assignments[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/assignments" }
+        },
+        {
+          "name": "Create assignment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseId\": \"{{baseId}}\",\n  \"personnelId\": \"{{personnelId}}\",\n  \"equipmentTypeId\": \"{{equipmentTypeId}}\",\n  \"quantity\": 1,\n  \"assignedAt\": \"2026-09-17T12:00:00.000Z\"\n}"
+            },
+            "url": "{{baseUrl}}/api/assignments"
+          }
+        },
+        {
+          "name": "List expenditures",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/assignments/expenditures" }
+        },
+        {
+          "name": "Record expenditure",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignmentId\": \"{{assignmentId}}\",\n  \"quantity\": 1,\n  \"expendedAt\": \"2026-09-17T12:00:00.000Z\"\n}"
+            },
+            "url": "{{baseUrl}}/api/assignments/expenditures"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit",
+      "item": [
+        {
+          "name": "Mutation audit logs",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/audit-logs" }
+        },
+        {
+          "name": "HTTP access logs",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/audit-logs/access" }
+        }
+      ]
+    }
+  ]
+}
