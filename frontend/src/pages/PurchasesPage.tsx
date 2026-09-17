@@ -27,6 +27,7 @@ export function PurchasesPage() {
   const [bases, setBases] = useState<Base[]>([]);
   const [equipment, setEquipment] = useState<EquipmentType[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     startDate: yearStart,
@@ -70,18 +71,42 @@ export function PurchasesPage() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    const qty = Number(form.quantity);
+    const cost = Number(form.unitCost);
+    if (!form.equipmentTypeId) {
+      setError("Pick an equipment type.");
+      return;
+    }
+    if (!Number.isInteger(qty) || qty < 1) {
+      setError("Enter a quantity of at least 1.");
+      return;
+    }
+    if (Number.isNaN(cost) || cost < 0) {
+      setError("Enter the unit cost. Use 0 if you do not have a price.");
+      return;
+    }
     setBusy(true);
+    setError(null);
+    setNotice(null);
     try {
+      const when = new Date(form.purchasedAt);
       await api.post("/purchases", {
         baseId: form.baseId,
         equipmentTypeId: form.equipmentTypeId,
-        quantity: Number(form.quantity),
-        unitCost: Number(form.unitCost),
-        purchasedAt: new Date(form.purchasedAt).toISOString(),
+        quantity: qty,
+        unitCost: cost,
+        purchasedAt: Number.isNaN(when.getTime()) ? new Date().toISOString() : when.toISOString(),
         notes: form.notes || undefined,
       });
+      const day = (form.purchasedAt || today).slice(0, 10);
+      const nextEnd = day > filters.endDate ? day : filters.endDate < today ? today : filters.endDate;
       setForm((prev) => ({ ...prev, quantity: "", unitCost: "", notes: "" }));
-      await load();
+      setNotice("Saved. The new line is in the list below.");
+      if (nextEnd === filters.endDate && !filters.equipmentTypeId) {
+        await load();
+      } else {
+        setFilters((prev) => ({ ...prev, equipmentTypeId: "", endDate: nextEnd }));
+      }
     } catch (err) {
       setError(apiError(err));
     } finally {
@@ -95,6 +120,9 @@ export function PurchasesPage() {
           New stock enters a station ledger here. Quantities immediately increase cage available.
       </PageHeader>
       <ErrorBanner message={error} />
+      {notice && (
+        <div className="border border-olive/50 bg-olive/10 px-3 py-2 text-sm text-olive">{notice}</div>
+      )}
       <DateFilters
         filters={filters}
         onChange={setFilters}
@@ -141,6 +169,7 @@ export function PurchasesPage() {
                 required
                 type="number"
                 min={1}
+                placeholder="100"
                 className={fieldClass}
                 value={form.quantity}
                 onChange={(e) => setForm({ ...form, quantity: e.target.value })}
@@ -152,6 +181,7 @@ export function PurchasesPage() {
                 type="number"
                 min={0}
                 step="0.01"
+                placeholder="0.31"
                 className={fieldClass}
                 value={form.unitCost}
                 onChange={(e) => setForm({ ...form, unitCost: e.target.value })}

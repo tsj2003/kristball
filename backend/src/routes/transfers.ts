@@ -3,7 +3,7 @@ import { z } from "zod";
 import { Prisma, TransferStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { authenticateToken, authorizeRoles, enforceBaseScope } from "../middleware/auth";
-import { actorFrom, HttpError, parseOptionalDate } from "../lib/http";
+import { actorFrom, HttpError, parseOptionalDate, startOfDay, endOfDay } from "../lib/http";
 import { assertAvailable, withStockLock } from "../services/inventory";
 import { writeAudit } from "../services/audit";
 
@@ -13,8 +13,10 @@ transfersRouter.use(authenticateToken, enforceBaseScope);
 
 transfersRouter.get("/", async (req, res, next) => {
   try {
-    const startDate = parseOptionalDate(req.query.startDate);
-    const endDate = parseOptionalDate(req.query.endDate);
+    const startDateRaw = parseOptionalDate(req.query.startDate);
+    const endDateRaw = parseOptionalDate(req.query.endDate);
+    const startDate = startDateRaw ? startOfDay(startDateRaw) : undefined;
+    const endDate = endDateRaw ? endOfDay(endDateRaw) : undefined;
     const equipmentTypeId =
       typeof req.query.equipmentTypeId === "string" ? req.query.equipmentTypeId : undefined;
     const status =

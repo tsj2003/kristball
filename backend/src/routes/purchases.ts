@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { authenticateToken, authorizeRoles, enforceBaseScope } from "../middleware/auth";
-import { actorFrom, parseOptionalDate } from "../lib/http";
+import { actorFrom, parseOptionalDate, startOfDay, endOfDay } from "../lib/http";
 import { writeAudit } from "../services/audit";
 
 export const purchasesRouter = Router();
@@ -11,8 +11,8 @@ purchasesRouter.use(authenticateToken, enforceBaseScope);
 
 purchasesRouter.get("/", async (req, res, next) => {
   try {
-    const startDate = parseOptionalDate(req.query.startDate);
-    const endDate = parseOptionalDate(req.query.endDate);
+    const start = parseOptionalDate(req.query.startDate);
+    const end = parseOptionalDate(req.query.endDate);
     const equipmentTypeId =
       typeof req.query.equipmentTypeId === "string" ? req.query.equipmentTypeId : undefined;
 
@@ -21,8 +21,8 @@ purchasesRouter.get("/", async (req, res, next) => {
         baseId: req.scopedBaseId ?? undefined,
         equipmentTypeId,
         purchasedAt: {
-          gte: startDate,
-          lte: endDate,
+          gte: start ? startOfDay(start) : undefined,
+          lte: end ? endOfDay(end) : undefined,
         },
       },
       include: {
