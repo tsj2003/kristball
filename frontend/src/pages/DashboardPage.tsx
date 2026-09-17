@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { api, apiError, Base, EquipmentType, Holding, PersonnelHolding, Summary } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { DateFilters, Filters } from "../components/DateFilters";
-import { ErrorBanner, Panel } from "../components/ui";
+import { ErrorBanner, ghostBtn, Panel } from "../components/ui";
+import { ExpendDialog } from "../components/ExpendDialog";
 import { HoldingsChart } from "../components/HoldingsChart";
 import { HoldingsTable } from "../components/HoldingsTable";
 import { MetricCards } from "../components/MetricCards";
@@ -30,6 +31,9 @@ export function DashboardPage() {
   const [people, setPeople] = useState<PersonnelHolding[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [expendTarget, setExpendTarget] = useState<PersonnelHolding | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [netOpen, setNetOpen] = useState(false);
   const [breakdown, setBreakdown] = useState<null | {
     purchases: { total: number; rows: Array<Record<string, unknown>> };
@@ -41,6 +45,7 @@ export function DashboardPage() {
   const isAdmin = user?.role === "ADMIN";
   const isCommander = user?.role === "BASE_COMMANDER";
   const isLogistics = user?.role === "LOGISTICS_OFFICER";
+  const canExpend = isAdmin || isCommander;
 
   const query = useMemo(() => {
     const params: Record<string, string> = {};
@@ -80,7 +85,7 @@ export function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [query, refreshKey]);
 
   async function openNet() {
     setNetOpen(true);
@@ -123,6 +128,9 @@ export function DashboardPage() {
       </Panel>
 
       <ErrorBanner message={error} />
+      {notice && (
+        <div className="border border-olive/50 bg-olive/10 px-3 py-2 text-sm text-olive">{notice}</div>
+      )}
 
       {loading && !summary ? <SkeletonRow rows={3} /> : summary && <MetricCards summary={summary} onNetClick={openNet} />}
 
@@ -144,7 +152,7 @@ export function DashboardPage() {
               <PersonnelHoldings rows={people} />
             </div>
           ) : (
-            <PersonnelHoldings rows={people} />
+            <PersonnelHoldings rows={people} canExpend={canExpend} onExpend={setExpendTarget} />
           )}
         </Panel>
       </div>
@@ -155,17 +163,32 @@ export function DashboardPage() {
             .filter((row) => row.category === "AMMUNITION")
             .slice(0, 3)
             .map((row) => (
-              <div key={row.assignmentId} className="plate px-4 py-3">
+              <div key={row.assignmentId} className="mb-2 flex flex-wrap items-center justify-between gap-3 plate px-4 py-3">
                 <div className="text-sm">
                   {row.rank} {row.personnelName} holds {formatQty(row.remaining, row.unit)} of {row.equipmentName}{" "}
                   remaining
                   {row.expended > 0 ? ` after expending ${formatQty(row.expended, row.unit)}` : ""}.
                 </div>
+                {row.remaining > 0 && (
+                  <button type="button" className={ghostBtn} onClick={() => setExpendTarget(row)}>
+                    Record expended
+                  </button>
+                )}
               </div>
             ))}
         </Panel>
       )}
 
+      <ExpendDialog
+        target={expendTarget}
+        onClose={() => setExpendTarget(null)}
+        onSaved={async (remaining) => {
+          const name = expendTarget ? `${expendTarget.rank} ${expendTarget.personnelName}` : "This person";
+          const unit = expendTarget?.unit;
+          setNotice(`Saved. ${formatQty(remaining, unit)} still with ${name}.`);
+          setRefreshKey((n) => n + 1);
+        }}
+      />
       <NetMovementModal open={netOpen} onClose={() => setNetOpen(false)} breakdown={breakdown} />
     </div>
   );

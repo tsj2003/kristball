@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import { api, apiError, Base, EquipmentType, Person, PersonnelHolding } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
-import { EmptyState, ErrorBanner, Field, fieldClass, ghostBtn, Panel, primaryBtn } from "../components/ui";
+import { EmptyState, ErrorBanner, Field, fieldClass, Panel, primaryBtn } from "../components/ui";
+import { ExpendDialog } from "../components/ExpendDialog";
 import { PageHeader } from "../components/PageHeader";
 import { PersonnelHoldings } from "../components/PersonnelHoldings";
 import { formatQty, toDateTimeLocal } from "../lib/format";
@@ -14,6 +15,7 @@ export function AssignmentsPage() {
   const [equipment, setEquipment] = useState<EquipmentType[]>([]);
   const [rows, setRows] = useState<PersonnelHolding[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [expendTarget, setExpendTarget] = useState<PersonnelHolding | null>(null);
   const [form, setForm] = useState({
@@ -22,11 +24,6 @@ export function AssignmentsPage() {
     equipmentTypeId: "",
     quantity: "",
     assignedAt: toDateTimeLocal(),
-    notes: "",
-  });
-  const [expend, setExpend] = useState({
-    quantity: "",
-    expendedAt: toDateTimeLocal(),
     notes: "",
   });
 
@@ -49,12 +46,13 @@ export function AssignmentsPage() {
   }
 
   useEffect(() => {
-    load();
+    void load();
   }, []);
 
   async function onAssign(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
+    setError(null);
     try {
       await api.post("/assignments", {
         baseId: form.baseId,
@@ -73,36 +71,18 @@ export function AssignmentsPage() {
     }
   }
 
-  async function onExpend(event: FormEvent) {
-    event.preventDefault();
-    if (!expendTarget) return;
-    setBusy(true);
-    try {
-      await api.post("/assignments/expenditures", {
-        assignmentId: expendTarget.assignmentId,
-        quantity: Number(expend.quantity),
-        expendedAt: new Date(expend.expendedAt).toISOString(),
-        notes: expend.notes || undefined,
-      });
-      setExpendTarget(null);
-      setExpend({ quantity: "", expendedAt: toDateTimeLocal(), notes: "" });
-      await load();
-    } catch (err) {
-      setError(apiError(err));
-    } finally {
-      setBusy(false);
-    }
-  }
-
   const filteredPeople = people.filter((person) => !form.baseId || person.baseId === form.baseId);
 
   return (
     <div className="space-y-6">
       <PageHeader kicker="ARMIGER // ISSUE" title="Issue & expend">
-        Issuing equipment to a person reduces cage stock. Recording an expenditure reduces that person's remaining
-        quantity automatically.
+        Issuing equipment to a person reduces cage stock. Use Record expended on a row to take rounds off that person.
+        The app will refuse a number bigger than what they still have.
       </PageHeader>
       <ErrorBanner message={error} />
+      {notice && (
+        <div className="border border-olive/50 bg-olive/10 px-3 py-2 text-sm text-olive">{notice}</div>
+      )}
 
       {canWrite && (
         <Panel title="Issue to personnel">
@@ -189,55 +169,6 @@ export function AssignmentsPage() {
         </Panel>
       )}
 
-      {expendTarget && canWrite && (
-        <Panel
-          title={`Expend from ${expendTarget.rank} ${expendTarget.personnelName}`}
-          action={
-            <button type="button" className={ghostBtn} onClick={() => setExpendTarget(null)}>
-              Cancel
-            </button>
-          }
-        >
-          <p className="mb-3 text-sm text-muted">
-            Currently remaining: {formatQty(expendTarget.remaining, expendTarget.unit)} of {expendTarget.equipmentName}.
-          </p>
-          <form onSubmit={onExpend} className="grid gap-3 sm:grid-cols-3">
-            <Field label="Quantity expended">
-              <input
-                required
-                type="number"
-                min={1}
-                max={expendTarget.remaining}
-                className={fieldClass}
-                value={expend.quantity}
-                onChange={(e) => setExpend({ ...expend, quantity: e.target.value })}
-              />
-            </Field>
-            <Field label="When">
-              <input
-                required
-                type="datetime-local"
-                className={fieldClass}
-                value={expend.expendedAt}
-                onChange={(e) => setExpend({ ...expend, expendedAt: e.target.value })}
-              />
-            </Field>
-            <Field label="Notes">
-              <input
-                className={fieldClass}
-                value={expend.notes}
-                onChange={(e) => setExpend({ ...expend, notes: e.target.value })}
-              />
-            </Field>
-            <div className="sm:col-span-3">
-              <button className={primaryBtn} disabled={busy} type="submit">
-                {busy ? "Recording…" : "Record expenditure"}
-              </button>
-            </div>
-          </form>
-        </Panel>
-      )}
-
       <Panel title="Current assignments">
         {rows.length === 0 ? (
           <EmptyState>No assignments on the books.</EmptyState>
@@ -245,6 +176,17 @@ export function AssignmentsPage() {
           <PersonnelHoldings rows={rows} canExpend={canWrite} onExpend={setExpendTarget} />
         )}
       </Panel>
+
+      <ExpendDialog
+        target={expendTarget}
+        onClose={() => setExpendTarget(null)}
+        onSaved={async (remaining) => {
+          const name = expendTarget ? `${expendTarget.rank} ${expendTarget.personnelName}` : "This person";
+          const unit = expendTarget?.unit;
+          setNotice(`Saved. ${formatQty(remaining, unit)} still with ${name}.`);
+          await load();
+        }}
+      />
     </div>
   );
 }

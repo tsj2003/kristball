@@ -1,6 +1,6 @@
 import { PersonnelHolding } from "../api/client";
 import { formatDateTime, formatQty } from "../lib/format";
-import { EmptyState } from "./ui";
+import { EmptyState, ghostBtn } from "./ui";
 
 export function PersonnelHoldings({
   rows,
@@ -17,7 +17,7 @@ export function PersonnelHoldings({
 
   return (
     <div className="overflow-x-auto">
-      <table className="data-table min-w-[760px]">
+      <table className="data-table min-w-[860px]">
         <thead>
           <tr>
             <th className="py-2 pr-3 font-medium">Personnel</th>
@@ -25,7 +25,8 @@ export function PersonnelHoldings({
             <th className="py-2 pr-3 font-medium">Assigned</th>
             <th className="py-2 pr-3 font-medium">Expended</th>
             <th className="py-2 pr-3 font-medium">Remaining</th>
-            <th className="py-2 font-medium">Issued</th>
+            <th className="py-2 pr-3 font-medium">Issued</th>
+            {canExpend && onExpend ? <th className="py-2 font-medium">Action</th> : null}
           </tr>
         </thead>
         <tbody>
@@ -40,19 +41,19 @@ export function PersonnelHoldings({
               <td className="py-2 pr-3">{row.equipmentName}</td>
               <td className="py-2 pr-3 tabular-nums">{formatQty(row.assignedQty, row.unit)}</td>
               <td className="py-2 pr-3 tabular-nums">{formatQty(row.expended, row.unit)}</td>
-              <td className="py-2 pr-3">
-                <div className="tabular-nums text-brass">{formatQty(row.remaining, row.unit)}</div>
-                {canExpend && onExpend && row.remaining > 0 && (
-                  <button
-                    type="button"
-                    className="mt-1 text-[11px] uppercase tracking-widest text-muted hover:text-brass"
-                    onClick={() => onExpend(row)}
-                  >
-                    Record expenditure
-                  </button>
-                )}
-              </td>
-              <td className="py-2 text-muted">{formatDateTime(row.assignedAt)}</td>
+              <td className="py-2 pr-3 tabular-nums text-brass">{formatQty(row.remaining, row.unit)}</td>
+              <td className="py-2 pr-3 text-muted">{formatDateTime(row.assignedAt)}</td>
+              {canExpend && onExpend ? (
+                <td className="py-2">
+                  {row.remaining > 0 ? (
+                    <button type="button" className={ghostBtn} onClick={() => onExpend(row)}>
+                      Record expended
+                    </button>
+                  ) : (
+                    <span className="text-xs text-muted">None left</span>
+                  )}
+                </td>
+              ) : null}
             </tr>
           ))}
         </tbody>
